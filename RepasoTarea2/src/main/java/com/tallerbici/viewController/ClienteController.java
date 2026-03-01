@@ -16,10 +16,7 @@ import java.util.ResourceBundle;
 /**
  * Controlador del módulo de Clientes.
  * Soporta registrar y editar clientes.
- *
- * MODO NORMAL:  botón → "✅ Registrar Cliente"
- * MODO EDICIÓN: botón → "💾 Guardar Cambios"
- *
+ * Tiene un modo normal y un modo edicion
  * @author Equipo TallerBici - Programación II
  */
 public class ClienteController implements Initializable {
@@ -38,15 +35,13 @@ public class ClienteController implements Initializable {
     private GestorTaller gestor = GestorTaller.getInstance();
     private boolean modoEdicion = false;
 
+    //Conecta la lista de clientes con el gestor
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
-        // Conectar el ListView con la lista del GestorTaller
-        // Cuando se agregue o edite un cliente, el ListView se actualiza solo
         listClientes.setItems(gestor.getListaClientes());
     }
 
-    // =================== ACCIÓN PRINCIPAL ===================
-
+    //Decide si registra un cliente nuevo o actualiza uno existente
     @FXML
     private void accionPrincipal() {
         if (modoEdicion) {
@@ -56,6 +51,7 @@ public class ClienteController implements Initializable {
         }
     }
 
+    //Registra un nuevo cliente con los datos del formulario
     private void registrarCliente() {
         try {
             Cliente nuevo = new Cliente.Builder()
@@ -66,14 +62,15 @@ public class ClienteController implements Initializable {
                     .build();
 
             gestor.registrarCliente(nuevo);
-            mostrarExito("✅ Cliente registrado: " + nuevo.getNombreCompleto());
+            mostrarExito("Cliente registrado: " + nuevo.getNombreCompleto());
             limpiarFormulario();
 
         } catch (IllegalStateException | IllegalArgumentException e) {
-            mostrarError("❌ " + e.getMessage());
+            mostrarError("Error" + e.getMessage());
         }
     }
 
+    //Actualiza la informacion de un cliente que ya existe
     private void actualizarCliente() {
         try {
             Cliente actualizado = new Cliente.Builder()
@@ -84,49 +81,43 @@ public class ClienteController implements Initializable {
                     .build();
 
             gestor.actualizarCliente(actualizado);
-            mostrarExito("💾 Cliente actualizado: " + actualizado.getNombreCompleto());
+            mostrarExito("Cliente actualizado: " + actualizado.getNombreCompleto());
             limpiarFormulario();
 
         } catch (IllegalStateException | IllegalArgumentException e) {
-            mostrarError("❌ " + e.getMessage());
+            mostrarError("Error" + e.getMessage());
         }
     }
 
-    // =================== EDITAR SELECCIONADO ===================
-
+    //Carga el formulario del cliente seleccionado
     @FXML
     private void editarSeleccionado() {
         Cliente seleccionado = listClientes.getSelectionModel().getSelectedItem();
         if (seleccionado == null) {
-            mostrarError("❌ Selecciona un cliente de la lista para editar.");
+            mostrarError("Selecciona un cliente de la lista para editar.");
             return;
         }
-        // Cargar datos en el formulario
         txtCedula.setText(seleccionado.getNumeroCedula());
-        txtCedula.setDisable(true); // La cédula no se puede cambiar
+        txtCedula.setDisable(true);
         txtNombre.setText(seleccionado.getNombreCompleto());
         txtTelefono.setText(seleccionado.getTelefono());
         txtDireccion.setText(seleccionado.getDireccion());
-
-        // Activar modo edición
+        
         modoEdicion = true;
-        btnAccion.setText("💾 Guardar Cambios");
+        btnAccion.setText("Guardar Cambios");
         btnAccion.setStyle("-fx-background-color: #F57C00; -fx-text-fill: white; -fx-font-weight: bold;");
         lblModoEdicion.setText("✏ Editando: " + seleccionado.getNombreCompleto());
         lblModoEdicion.setStyle("-fx-text-fill: #E65100; -fx-font-weight: bold;");
     }
 
-    // =================== BÚSQUEDA ===================
-
+//Filtra la lista de clientes segun el texto escrito
     @FXML
     private void filtrarClientes() {
         String criterio = txtBuscarCliente.getText().trim().toLowerCase();
 
         if (criterio.isEmpty()) {
-            // Sin texto: mostrar todos
             listClientes.setItems(gestor.getListaClientes());
         } else {
-            // Con texto: recorrer la lista y agregar los que coincidan
             ArrayList<Cliente> filtrados = new ArrayList<>();
             for (Cliente c : gestor.getListaClientes()) {
                 if (c.coincideCon(criterio)) {
@@ -137,8 +128,7 @@ public class ClienteController implements Initializable {
         }
     }
 
-    // =================== DETALLE ===================
-
+//Muestra los detalles del cliente seleccionado
     @FXML
     private void mostrarDetalleCliente(MouseEvent event) {
         Cliente seleccionado = listClientes.getSelectionModel().getSelectedItem();
@@ -147,8 +137,7 @@ public class ClienteController implements Initializable {
         }
     }
 
-    // =================== LIMPIAR ===================
-
+    //Limpia todos los campos del formulario
     @FXML
     public void limpiarFormulario() {
         txtCedula.clear();
@@ -161,17 +150,18 @@ public class ClienteController implements Initializable {
         txtDetalleCliente.clear();
         txtBuscarCliente.clear();
         modoEdicion = false;
-        btnAccion.setText("✅ Registrar Cliente");
+        btnAccion.setText("Registrar Cliente");
         btnAccion.setStyle("-fx-background-color: #1A237E; -fx-text-fill: white; -fx-font-weight: bold;");
         listClientes.setItems(gestor.getListaClientes());
         listClientes.getSelectionModel().clearSelection();
     }
 
+    //Muestra un mensaje de exito en color verde
     private void mostrarExito(String msg) {
         lblMensaje.setStyle("-fx-text-fill: #388E3C; -fx-font-size: 12px;");
         lblMensaje.setText(msg);
     }
-
+//Muestra un mensaje de error en color rojo
     private void mostrarError(String msg) {
         lblMensaje.setStyle("-fx-text-fill: #C62828; -fx-font-size: 12px;");
         lblMensaje.setText(msg);
