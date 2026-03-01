@@ -13,7 +13,6 @@ import java.util.ResourceBundle;
 
 /**
  * Controlador del módulo de Mecánicos.
- * Soporta los modos registro y edición.
  *
  * @author Equipo TallerBici - Programación II
  */
