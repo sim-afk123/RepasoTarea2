@@ -39,19 +39,17 @@ public class BicicletaController implements Initializable {
     private GestorTaller gestor = GestorTaller.getInstance();
     private boolean modoEdicion = false;
 
+    // Se inicializan los combos y la lista de bicicletas
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
-        // Cargar tipos de bicicleta en el combo
         cmbTipo.setItems(FXCollections.observableArrayList(TipoBicicleta.values()));
         cmbTipo.getSelectionModel().selectFirst();
-
-        // El combo de clientes apunta a la lista del GestorTaller
-        // Si se registra un cliente nuevo en otro tab, aquí aparece solo
         cmbCliente.setItems(gestor.getListaClientes());
 
         listBicicletas.setItems(gestor.getListaBicicletas());
     }
 
+    //Decice si se va a registrar o actualizar una bicleta
     @FXML
     private void accionPrincipal() {
         if (modoEdicion) {
@@ -61,6 +59,7 @@ public class BicicletaController implements Initializable {
         }
     }
 
+    //Registra una nueva bicicleta con los datos del formulario
     private void registrarBicicleta() {
         try {
             Cliente duenio = cmbCliente.getValue();
@@ -79,14 +78,15 @@ public class BicicletaController implements Initializable {
                     .build();
 
             gestor.registrarBicicleta(nueva);
-            mostrarExito("✅ Bicicleta registrada: " + nueva.getResumen());
+            mostrarExito("Bicicleta registrada: " + nueva.getResumen());
             limpiarFormulario();
 
         } catch (IllegalStateException | IllegalArgumentException e) {
-            mostrarError("❌ " + e.getMessage());
+            mostrarError("Error" + e.getMessage());
         }
     }
 
+    //Actualiza los datos de una bicicleta que ya existen
     private void actualizarBicicleta() {
         try {
             Cliente duenio = cmbCliente.getValue();
@@ -113,19 +113,19 @@ public class BicicletaController implements Initializable {
         }
     }
 
+    //Carga los datos de la bicicleta seleccionada en el formulario
     @FXML
     private void editarSeleccionado() {
         Bicicleta sel = listBicicletas.getSelectionModel().getSelectedItem();
         if (sel == null) { mostrarError("❌ Selecciona una bicicleta para editar."); return; }
 
         txtSerial.setText(sel.getNumeroSerial());
-        txtSerial.setDisable(true); // El serial no se puede cambiar
+        txtSerial.setDisable(true);
         txtMarca.setText(sel.getMarca());
         cmbTipo.setValue(sel.getTipo());
         txtColor.setText(sel.getColor());
         spinnerAnio.getValueFactory().setValue(sel.getAnio());
 
-        // Buscar y seleccionar el dueño en el combo
         Cliente duenio = gestor.buscarCliente(sel.getCedulaCliente());
         if (duenio != null) {
             cmbCliente.setValue(duenio);
@@ -138,6 +138,7 @@ public class BicicletaController implements Initializable {
         lblModoEdicion.setStyle("-fx-text-fill: #E65100; -fx-font-weight: bold;");
     }
 
+    //Muestra la lista de bicicletas segun el texto
     @FXML
     private void filtrarBicicletas() {
         String criterio = txtBuscarBici.getText().trim().toLowerCase();
@@ -155,6 +156,7 @@ public class BicicletaController implements Initializable {
         }
     }
 
+    //Muestra los detalles de la bicicleta seleccionada
     @FXML
     private void mostrarDetalleBici(MouseEvent event) {
         Bicicleta sel = listBicicletas.getSelectionModel().getSelectedItem();
@@ -168,6 +170,7 @@ public class BicicletaController implements Initializable {
         }
     }
 
+    //Limpia los cambios del formulario y reinicia el modo edicion
     @FXML
     public void limpiarFormulario() {
         txtSerial.clear();
@@ -187,11 +190,13 @@ public class BicicletaController implements Initializable {
         listBicicletas.getSelectionModel().clearSelection();
     }
 
+    //Muestra el mensaje de exito en color verde
     private void mostrarExito(String msg) {
         lblMensaje.setStyle("-fx-text-fill: #388E3C; -fx-font-size: 12px;");
         lblMensaje.setText(msg);
     }
 
+    //Muestra un mensaje de error en color rojo
     private void mostrarError(String msg) {
         lblMensaje.setStyle("-fx-text-fill: #C62828; -fx-font-size: 12px;");
         lblMensaje.setText(msg);
