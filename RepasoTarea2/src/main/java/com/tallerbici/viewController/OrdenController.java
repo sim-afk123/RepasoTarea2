@@ -17,12 +17,6 @@ import java.util.ResourceBundle;
 /**
  * Controlador del módulo de Órdenes de Servicio.
  *
- * Los combos de bicicleta y mecánico usan las ObservableLists del GestorTaller,
- * por eso si se registra una bicicleta nueva en otro tab, aparece aquí automáticamente.
- *
- * Al editar una orden solo se puede cambiar: diagnóstico, trabajos, costo y estado.
- * La bicicleta, el mecánico y el motivo son datos del ingreso y no cambian.
- *
  * @author Equipo TallerBici - Programación II
  */
 public class OrdenController implements Initializable {
@@ -44,10 +38,9 @@ public class OrdenController implements Initializable {
     private boolean modoEdicion = false;
     private OrdenServicio ordenEnEdicion = null;
 
+    //Inicializa los combos y la lista de ordenes
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
-        // Estos combos apuntan a las listas del GestorTaller
-        // Si se registra una bicicleta o mecánico nuevo, aparecen solos aquí
         cmbBicicleta.setItems(gestor.getListaBicicletas());
         cmbMecanico.setItems(gestor.getListaMecanicos());
         cmbEstado.setItems(FXCollections.observableArrayList(EstadoOrden.values()));
@@ -55,6 +48,7 @@ public class OrdenController implements Initializable {
         listOrdenes.setItems(gestor.getListaOrdenes());
     }
 
+    //Decide si se crea una orden nueva o se actualiza una existente
     @FXML
     private void accionPrincipal() {
         if (modoEdicion) {
@@ -64,46 +58,46 @@ public class OrdenController implements Initializable {
         }
     }
 
+    //Crea una nueva orden de servicio con los datos registrados
     private void crearOrden() {
         try {
             Bicicleta bici = cmbBicicleta.getValue();
             Mecanico mec   = cmbMecanico.getValue();
 
-            if (bici == null) { mostrarError("❌ Selecciona una bicicleta."); return; }
-            if (mec == null)  { mostrarError("❌ Selecciona un mecánico."); return; }
-            if (txtMotivo.getText().isBlank()) { mostrarError("❌ El motivo es obligatorio."); return; }
+            if (bici == null) { mostrarError("Selecciona una bicicleta."); return; }
+            if (mec == null)  { mostrarError("Selecciona un mecánico."); return; }
+            if (txtMotivo.getText().isBlank()) { mostrarError("El motivo es obligatorio."); return; }
 
-            // Crear la orden en el GestorTaller (genera el ID automáticamente)
             OrdenServicio orden = gestor.crearOrden(
                     bici.getNumeroSerial(),
                     mec.getCodigoInterno(),
                     txtMotivo.getText().trim()
             );
-
-            // Aplicar los campos opcionales si se llenaron
+            
             aplicarCamposOpcionales(orden);
             gestor.actualizarOrden(orden);
 
-            mostrarExito("✅ Orden creada: " + orden.getIdOrden());
+            mostrarExito("Orden creada: " + orden.getIdOrden());
             limpiarFormulario();
 
         } catch (IllegalArgumentException | IllegalStateException e) {
-            mostrarError("❌ " + e.getMessage());
+            mostrarError("Error" + e.getMessage());
         }
     }
 
+    //Guarda los cambios realizados a un orden
     private void actualizarOrden() {
         try {
             aplicarCamposOpcionales(ordenEnEdicion);
             gestor.actualizarOrden(ordenEnEdicion);
-            mostrarExito("💾 Orden actualizada: " + ordenEnEdicion.getIdOrden());
+            mostrarExito("Orden actualizada: " + ordenEnEdicion.getIdOrden());
             limpiarFormulario();
         } catch (IllegalArgumentException | IllegalStateException e) {
-            mostrarError("❌ " + e.getMessage());
+            mostrarError("Error" + e.getMessage());
         }
     }
 
-    /** Escribe diagnóstico, trabajos, costo y estado en el objeto orden. */
+    //Aplica a la orden el diagnóstico, trabajos, costo y estado en el objeto orden.
     private void aplicarCamposOpcionales(OrdenServicio orden) {
         if (!txtDiagnostico.getText().isBlank()) {
             orden.setDiagnostico(txtDiagnostico.getText().trim());
@@ -125,14 +119,13 @@ public class OrdenController implements Initializable {
         }
     }
 
+    //Carga en el formulario la orden seleccionada
     @FXML
     private void editarSeleccionado() {
         OrdenServicio sel = listOrdenes.getSelectionModel().getSelectedItem();
-        if (sel == null) { mostrarError("❌ Selecciona una orden para editar."); return; }
+        if (sel == null) { mostrarError("Selecciona una orden para editar."); return; }
 
         ordenEnEdicion = sel;
-
-        // Mostrar los datos de ingreso (no se pueden cambiar)
         Bicicleta bici = gestor.buscarBicicleta(sel.getSerialBicicleta());
         Mecanico mec   = gestor.buscarMecanico(sel.getCodigoMecanico());
         cmbBicicleta.setValue(bici);
@@ -142,7 +135,6 @@ public class OrdenController implements Initializable {
         txtMotivo.setText(sel.getMotivoServicio());
         txtMotivo.setDisable(true);
 
-        // Campos que sí se pueden editar
         txtDiagnostico.setText(sel.getDiagnostico());
         txtTrabajos.setText(sel.getTrabajosRealizados());
         txtCosto.setText(String.valueOf(sel.getCostoTotal()));
@@ -155,6 +147,7 @@ public class OrdenController implements Initializable {
         lblModoEdicion.setStyle("-fx-text-fill: #E65100; -fx-font-size: 11px; -fx-font-weight: bold;");
     }
 
+    //Muestra el detalle completo de la orden seleccionada
     @FXML
     private void mostrarDetalleOrden(MouseEvent event) {
         OrdenServicio sel = listOrdenes.getSelectionModel().getSelectedItem();
@@ -177,6 +170,7 @@ public class OrdenController implements Initializable {
         }
     }
 
+    //Limpia el formulario y vuelve al modo normal
     @FXML
     public void limpiarFormulario() {
         cmbBicicleta.setDisable(false);
@@ -194,16 +188,18 @@ public class OrdenController implements Initializable {
         txtDetalleOrden.clear();
         modoEdicion = false;
         ordenEnEdicion = null;
-        btnAccion.setText("📋 Crear Orden");
+        btnAccion.setText("Crear Orden");
         btnAccion.setStyle("-fx-background-color: #1A237E; -fx-text-fill: white; -fx-font-weight: bold;");
         listOrdenes.getSelectionModel().clearSelection();
     }
 
+    //Muestra un mensaje de exito en color verde
     private void mostrarExito(String msg) {
         lblMensaje.setStyle("-fx-text-fill: #388E3C; -fx-font-size: 12px;");
         lblMensaje.setText(msg);
     }
 
+    //Muestra un mensaje de error en color rojo
     private void mostrarError(String msg) {
         lblMensaje.setStyle("-fx-text-fill: #C62828; -fx-font-size: 12px;");
         lblMensaje.setText(msg);
