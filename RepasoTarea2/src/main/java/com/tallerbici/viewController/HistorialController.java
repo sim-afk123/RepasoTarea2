@@ -29,17 +29,18 @@ public class HistorialController implements Initializable {
 
     private GestorTaller gestor = GestorTaller.getInstance();
 
+    //Muestra todas las ordenes registradas
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
-        // Mostrar todas las órdenes al abrir el módulo
         listResultados.setItems(gestor.getListaOrdenes());
     }
 
+    //Busca las ordenes segun el numero serial de la bicicleta
     @FXML
     private void buscarPorSerial() {
         String serial = txtSerialBuscar.getText().trim();
         if (serial.isEmpty()) {
-            lblResultado.setText("❌ Escribe el número serial de la bicicleta.");
+            lblResultado.setText("Escribe el número serial de la bicicleta.");
             lblResultado.setStyle("-fx-text-fill: #C62828;");
             return;
         }
@@ -58,11 +59,12 @@ public class HistorialController implements Initializable {
         txtDetalleHistorial.clear();
     }
 
+    //Busca las ordenes segun la fecha seleccionada
     @FXML
     private void buscarPorFecha() {
         LocalDate fecha = dateFechaBuscar.getValue();
         if (fecha == null) {
-            lblResultado.setText("❌ Selecciona una fecha.");
+            lblResultado.setText("Selecciona una fecha.");
             lblResultado.setStyle("-fx-text-fill: #C62828;");
             return;
         }
@@ -81,6 +83,7 @@ public class HistorialController implements Initializable {
         txtDetalleHistorial.clear();
     }
 
+    //Muestra todas las ordenes registradas y limpia los filtros
     @FXML
     private void mostrarTodasLasOrdenes() {
         listResultados.setItems(gestor.getListaOrdenes());
@@ -91,6 +94,7 @@ public class HistorialController implements Initializable {
         txtDetalleHistorial.clear();
     }
 
+    //Muestra el detalle de la orden seleccionada
     @FXML
     private void mostrarDetalleHistorial(MouseEvent event) {
         OrdenServicio sel = listResultados.getSelectionModel().getSelectedItem();
