@@ -13,7 +13,7 @@ import java.util.ResourceBundle;
 
 /**
  * Controlador del módulo de Mecánicos.
- * Soporta registro y edición.
+ * Soporta los modos registro y edición.
  *
  * @author Equipo TallerBici - Programación II
  */
@@ -37,12 +37,14 @@ public class MecanicoController implements Initializable {
             "Cuadros y Estructura", "Rodado y Llantas", "General"
     };
 
+    //Inicializa el combo de especialidades y la lista
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
         cmbEspecialidad.setItems(FXCollections.observableArrayList(ESPECIALIDADES));
         listMecanicos.setItems(gestor.getListaMecanicos());
     }
 
+    //Devide si registra o actualiza un mecanico
     @FXML
     private void accionPrincipal() {
         if (modoEdicion) {
@@ -52,6 +54,7 @@ public class MecanicoController implements Initializable {
         }
     }
 
+    //Registra un nuevo mecanico con los datos del formulario
     private void registrarMecanico() {
         try {
             String especialidad = obtenerEspecialidad();
@@ -62,13 +65,14 @@ public class MecanicoController implements Initializable {
                     .numeroCertificacion(txtCertificacion.getText().trim())
                     .build();
             gestor.registrarMecanico(nuevo);
-            mostrarExito("✅ Mecánico registrado: " + nuevo.getNombreCompleto());
+            mostrarExito("Mecánico registrado: " + nuevo.getNombreCompleto());
             limpiarFormulario();
         } catch (IllegalStateException | IllegalArgumentException e) {
-            mostrarError("❌ " + e.getMessage());
+            mostrarError("Error" + e.getMessage());
         }
     }
 
+    //Actualiza la informacion de un mecanico existente
     private void actualizarMecanico() {
         try {
             String especialidad = obtenerEspecialidad();
@@ -79,31 +83,33 @@ public class MecanicoController implements Initializable {
                     .numeroCertificacion(txtCertificacion.getText().trim())
                     .build();
             gestor.actualizarMecanico(actualizado);
-            mostrarExito("💾 Mecánico actualizado: " + actualizado.getNombreCompleto());
+            mostrarExito("Mecánico actualizado: " + actualizado.getNombreCompleto());
             limpiarFormulario();
         } catch (IllegalStateException | IllegalArgumentException e) {
-            mostrarError("❌ " + e.getMessage());
+            mostrarError("Error" + e.getMessage());
         }
     }
 
+    //Carga en el formulario los datos del mecanico seleccionado
     @FXML
     private void editarSeleccionado() {
         Mecanico sel = listMecanicos.getSelectionModel().getSelectedItem();
-        if (sel == null) { mostrarError("❌ Selecciona un mecánico para editar."); return; }
+        if (sel == null) { mostrarError("Selecciona un mecánico para editar."); return; }
 
         txtCodigo.setText(sel.getCodigoInterno());
-        txtCodigo.setDisable(true); // El código no se puede cambiar
+        txtCodigo.setDisable(true);
         txtNombre.setText(sel.getNombreCompleto());
         cmbEspecialidad.getEditor().setText(sel.getEspecialidad());
         txtCertificacion.setText(sel.getNumeroCertificacion());
 
         modoEdicion = true;
-        btnAccion.setText("💾 Guardar Cambios");
+        btnAccion.setText("Guardar Cambios");
         btnAccion.setStyle("-fx-background-color: #F57C00; -fx-text-fill: white; -fx-font-weight: bold;");
         lblModoEdicion.setText("✏ Editando: " + sel.getNombreCompleto());
         lblModoEdicion.setStyle("-fx-text-fill: #E65100; -fx-font-weight: bold;");
     }
 
+    //Muestra los detalles del mecanico seleccionado
     @FXML
     private void mostrarDetalleMecanico(MouseEvent event) {
         Mecanico sel = listMecanicos.getSelectionModel().getSelectedItem();
@@ -112,6 +118,7 @@ public class MecanicoController implements Initializable {
         }
     }
 
+    //Limpia todos los campos del formulario
     @FXML
     public void limpiarFormulario() {
         txtCodigo.clear();
@@ -124,18 +131,18 @@ public class MecanicoController implements Initializable {
         lblModoEdicion.setText("");
         txtDetalleMecanico.clear();
         modoEdicion = false;
-        btnAccion.setText("✅ Registrar Mecánico");
+        btnAccion.setText("Registrar Mecánico");
         btnAccion.setStyle("-fx-background-color: #1A237E; -fx-text-fill: white; -fx-font-weight: bold;");
         listMecanicos.getSelectionModel().clearSelection();
     }
 
+    //Obtiene la especialidad escrita o seleccionada
     private String obtenerEspecialidad() {
-        // Si el usuario escribió algo directo en el combo (editable), usar eso
         String escrita = cmbEspecialidad.getEditor().getText().trim();
         if (!escrita.isEmpty()) {
             return escrita;
         }
-        // Si seleccionó de la lista
+
         String seleccionada = cmbEspecialidad.getValue();
         if (seleccionada != null) {
             return seleccionada;
@@ -143,11 +150,13 @@ public class MecanicoController implements Initializable {
         return "";
     }
 
+    //Muestra un mensaje de exito en color verde
     private void mostrarExito(String msg) {
         lblMensaje.setStyle("-fx-text-fill: #388E3C; -fx-font-size: 12px;");
         lblMensaje.setText(msg);
     }
 
+    //Muestra un mensaje de error en color rojo
     private void mostrarError(String msg) {
         lblMensaje.setStyle("-fx-text-fill: #C62828; -fx-font-size: 12px;");
         lblMensaje.setText(msg);
